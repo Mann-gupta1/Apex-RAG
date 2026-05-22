@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "description": "Baseline RAGAS metrics for regression guard. Re-run `make eval` to refresh.",
+  "ran_at": "2026-05-19T00:00:00Z",
+  "variant": "apex",
+  "metrics": {
+    "faithfulness": 0.85,
+    "context_recall": 0.80,
+    "context_precision": 0.78,
+    "answer_relevance": 0.86,
+    "answer_correctness": 0.74
+  }
+}

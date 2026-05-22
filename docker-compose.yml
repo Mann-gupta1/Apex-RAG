@@ -1,0 +1,106 @@
+name: apex-rag
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: apex-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-apex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apex_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-apex_rag}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./vector_db/pgvector/init.sql:/docker-entrypoint-initdb.d/00_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-apex} -d ${POSTGRES_DB:-apex_rag}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: apex-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: apex-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: 24h
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ollama-bootstrap:
+    image: ollama/ollama:latest
+    container_name: apex-ollama-bootstrap
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    command:
+      - |
+        echo "Pulling Ollama models...";
+        ollama pull ${OLLAMA_GENERATION_MODEL:-llama3.1:8b-instruct-q4_K_M};
+        echo "Done. Bootstrap container exiting.";
+    restart: "no"
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: apex-phoenix
+    restart: unless-stopped
+    ports:
+      - "6006:6006"
+      - "4317:4317"
+    environment:
+      PHOENIX_WORKING_DIR: /mnt/data
+    volumes:
+      - phoenix_data:/mnt/data
+
+  # Optional Weaviate driver, enabled via: docker compose --profile weaviate up
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.25.0
+    container_name: apex-weaviate
+    profiles: ["weaviate"]
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "50052:50051"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: /var/lib/weaviate
+      DEFAULT_VECTORIZER_MODULE: none
+      ENABLE_MODULES: ""
+      CLUSTER_HOSTNAME: node1
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+  phoenix_data:
+  weaviate_data:

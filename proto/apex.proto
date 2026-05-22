@@ -1,0 +1,93 @@
+// Apex RAG gRPC contract.
+//
+// Three services:
+//   * SearchService — server-streaming hybrid search results.
+//   * RAGService    — bidirectional chat (client streams query refinements,
+//                     server streams agent steps + answer tokens).
+//   * AgentService  — RPC for triggering deterministic tools.
+//
+// Regenerate stubs:  make proto
+
+syntax = "proto3";
+
+package apex.v1;
+
+// ---------- shared messages ----------
+enum Modality {
+  MODALITY_UNSPECIFIED = 0;
+  MODALITY_TEXT = 1;
+  MODALITY_IMAGE = 2;
+  MODALITY_VIDEO = 3;
+  MODALITY_AUDIO = 4;
+}
+
+message Provenance {
+  string source_uri = 1;
+  Modality modality = 2;
+  optional int32 page = 3;
+  optional double timestamp_start = 4;
+  optional double timestamp_end = 5;
+  optional string speaker = 6;
+}
+
+message Chunk {
+  string id = 1;
+  Modality modality = 2;
+  string content = 3;
+  optional string context_summary = 4;
+  Provenance provenance = 5;
+}
+
+message RetrievedChunk {
+  Chunk chunk = 1;
+  double score = 2;
+  optional int32 fusion_rank = 3;
+}
+
+// ---------- SearchService ----------
+message SearchRequest {
+  string query = 1;
+  string tenant_id = 2;
+  repeated Modality modalities = 3;
+  int32 top_k = 4;
+}
+
+service SearchService {
+  // Server-streaming: emits one RetrievedChunk per result as soon as the
+  // backend produces it.
+  rpc Search(SearchRequest) returns (stream RetrievedChunk);
+}
+
+// ---------- RAGService ----------
+message ChatTurn {
+  string query = 1;
+  string tenant_id = 2;
+}
+
+message ChatEvent {
+  string event = 1;   // router | retrieved | token | critique | answer_done | done
+  string payload = 2; // JSON
+}
+
+service RAGService {
+  // Bidirectional chat: clients can send follow-up turns mid-stream.
+  rpc Chat(stream ChatTurn) returns (stream ChatEvent);
+}
+
+// ---------- AgentService ----------
+message ToolRequest {
+  string tool = 1;
+  string args_json = 2;
+  string tenant_id = 3;
+}
+
+message ToolResponse {
+  string name = 1;
+  bool ok = 2;
+  string result_json = 3;
+  string error = 4;
+}
+
+service AgentService {
+  rpc Call(ToolRequest) returns (ToolResponse);
+}

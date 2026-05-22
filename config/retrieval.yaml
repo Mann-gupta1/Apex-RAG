@@ -1,0 +1,72 @@
+# Apex RAG retrieval configuration
+# Tunables for the retrieval pipeline. Override per-environment via env vars.
+
+vector_store:
+  driver: pgvector        # pgvector | weaviate
+  pgvector:
+    dense_index: hnsw
+    hnsw:
+      m: 16
+      ef_construction: 64
+      ef_search: 40
+    distance: cosine      # cosine | l2 | inner_product
+  weaviate:
+    class_name: ApexChunk
+    distance: cosine
+
+embeddings:
+  text:
+    model: BAAI/bge-base-en-v1.5
+    dim: 768
+    normalize: true
+    batch_size: 32
+  image:
+    backbone: ViT-B-32
+    pretrained: laion2b_s34b_b79k
+    dim: 512
+    batch_size: 16
+
+chunking:
+  text:
+    chunk_size: 512
+    chunk_overlap: 64
+    strategy: sliding_window
+  contextual_retrieval:
+    enabled: true
+    summary_max_tokens: 80
+
+hybrid:
+  enabled: true
+  rrf_k: 60
+  dense_top_k: 50
+  sparse_top_k: 50
+  final_top_k: 20
+
+query_rewrite:
+  hyde:
+    enabled: true
+    n_hypotheticals: 1
+  step_back:
+    enabled: true
+  multi_query:
+    enabled: true
+    n_queries: 3
+
+rerank:
+  enabled: true
+  model: BAAI/bge-reranker-base
+  top_n_input: 20
+  top_k_output: 6
+  batch_size: 16
+
+advanced:
+  late_interaction:
+    enabled: false       # experimental ColBERT-style scoring
+  adaptive_depth:
+    enabled: true
+    simple_top_k: 3
+    complex_top_k: 20
+
+safety:
+  pii_redaction: true
+  nli_threshold: 0.80

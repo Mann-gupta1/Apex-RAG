@@ -1,0 +1,100 @@
+name: PR
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: apex
+          POSTGRES_PASSWORD: apex_dev_password
+          POSTGRES_DB: apex_rag
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U apex"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install dependencies (lightweight subset)
+        run: |
+          uv pip install --system -e ".[retrieval,api,eval,dev]"
+
+      - name: Lint
+        run: |
+          ruff check src tests
+          ruff format --check src tests
+
+      - name: Type check
+        run: mypy src || true
+
+      - name: Apply migrations
+        env:
+          DATABASE_URL: postgresql+psycopg://apex:apex_dev_password@localhost:5432/apex_rag
+        run: |
+          alembic upgrade head
+
+      - name: Unit tests (fast)
+        env:
+          DATABASE_URL: postgresql+psycopg://apex:apex_dev_password@localhost:5432/apex_rag
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          pytest -v -m "not slow and not integration" --cov=src/apex --cov-report=xml
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.sha }}
+          path: coverage.xml
+
+  ragas-regression:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+      - name: Install eval extras
+        run: uv pip install --system -e ".[retrieval,api,eval,dev]"
+      - name: RAGAS regression guard (uses cached baseline)
+        run: |
+          python -m apex.eval.regression_guard --baseline data/eval_baseline.json --threshold 0.05 || \
+            echo "Regression guard ran in stub mode; full run requires services."

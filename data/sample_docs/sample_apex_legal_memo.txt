@@ -1,0 +1,7 @@
+APEX LEGAL DISCOVERY — INTERNAL MEMO (Synthetic)
+
+In the matter of Acme Corp. v. Beta Industries (Case No. 24-CV-1234), witness Smith testified during a video deposition recorded on 2024-03-14 that contract clause 4.2 was modified verbally on 2023-11-02, two weeks before the alleged breach. This conflicts with Exhibit 7, a signed amendment dated 2023-12-10.
+
+Counsel should cross-reference the audio deposition at timestamp 12:34-14:56 and image Exhibit 3 (the redlined draft).
+
+Recommendation: highlight inconsistency between Smith's testimony and the documentary evidence in the motion for summary judgment.

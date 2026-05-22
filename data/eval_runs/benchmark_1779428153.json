@@ -1,0 +1,56 @@
+{
+  "variants": [
+    {
+      "id": "naive",
+      "use_hyde": false,
+      "use_rerank": false,
+      "use_multi_query": false,
+      "top_k": 5
+    },
+    {
+      "id": "apex",
+      "use_hyde": true,
+      "use_rerank": true,
+      "use_multi_query": true,
+      "top_k": 6
+    }
+  ],
+  "runs": {
+    "naive": {
+      "metrics": {
+        "context_recall": 0.62,
+        "context_precision": 0.58,
+        "faithfulness": 0.71,
+        "answer_relevance": 0.68,
+        "answer_correctness": 0.64
+      },
+      "latency": {
+        "n": 50,
+        "p50_ms": 180.0,
+        "p95_ms": 410.0,
+        "p99_ms": 450.0,
+        "mean_ms": 215.0
+      },
+      "run_id": "mock-naive"
+    },
+    "apex": {
+      "metrics": {
+        "context_recall": 0.89,
+        "context_precision": 0.87,
+        "faithfulness": 0.94,
+        "answer_relevance": 0.91,
+        "answer_correctness": 0.88
+      },
+      "latency": {
+        "n": 50,
+        "p50_ms": 320.0,
+        "p95_ms": 760.0,
+        "p99_ms": 890.0,
+        "mean_ms": 388.0
+      },
+      "run_id": "mock-apex"
+    }
+  },
+  "ts": 1779428153,
+  "mock": true
+}
