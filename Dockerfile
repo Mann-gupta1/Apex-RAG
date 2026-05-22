@@ -24,6 +24,7 @@ COPY proto/ ./proto/
 COPY config/ ./config/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
+COPY vector_db/ ./vector_db/
 COPY README.md ./
 
 RUN pip install --upgrade pip && \
