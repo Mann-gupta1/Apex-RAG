@@ -113,6 +113,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/apex"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"vector_db" = "vector_db"
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
@@ -150,4 +153,4 @@ markers = [
 
 [tool.coverage.run]
 source = ["src/apex"]
-omit = ["src/apex/api/grpc_pb2*.py", "src/apex/api/grpc_pb2_grpc.py"]
+omit = ["src/apex/api/apex_pb2.py", "src/apex/api/apex_pb2_grpc.py"]

@@ -7,6 +7,7 @@ Postgres/pgvector. ``patch_factory`` swaps it into ``apex.retrieval.store_factor
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 
@@ -141,7 +142,8 @@ class FakeTextEmbedder:
         for t in texts:
             vec = [0.0] * self.dim
             for tok in (t or "").lower().split():
-                idx = hash(tok) % self.dim
+                digest = hashlib.md5(tok.encode(), usedforsecurity=False).hexdigest()
+                idx = int(digest, 16) % self.dim
                 vec[idx] += 1.0
             arr = np.array(vec, dtype="float32")
             n = float((arr * arr).sum() ** 0.5)
