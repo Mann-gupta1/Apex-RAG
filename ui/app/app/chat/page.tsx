@@ -6,6 +6,13 @@ import { api } from "@/lib/api";
 
 type Step = { node: string; detail?: Record<string, unknown> };
 
+function asRecord(data: unknown): Record<string, unknown> | undefined {
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    return data as Record<string, unknown>;
+  }
+  return undefined;
+}
+
 export default function ChatPage() {
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState("");
@@ -29,17 +36,18 @@ export default function ChatPage() {
     stopRef.current = api.streamChat(
       { query },
       ({ event, data }) => {
+        const payload = asRecord(data);
         if (event === "router") {
-          setSteps((s) => [...s, { node: "router", detail: data }]);
+          setSteps((s) => [...s, { node: "router", detail: payload }]);
         } else if (event === "retrieved") {
-          setSteps((s) => [...s, { node: "retrieved", detail: data }]);
+          setSteps((s) => [...s, { node: "retrieved", detail: payload }]);
         } else if (event === "token") {
-          setAnswer((prev) => prev + (data?.delta ?? ""));
+          setAnswer((prev) => prev + String(payload?.delta ?? ""));
         } else if (event === "critique") {
-          setNli(typeof data?.nli === "number" ? data.nli : null);
-          setSteps((s) => [...s, { node: "critique", detail: data }]);
+          setNli(typeof payload?.nli === "number" ? payload.nli : null);
+          setSteps((s) => [...s, { node: "critique", detail: payload }]);
         } else if (event === "done") {
-          setCitations(data?.citations ?? []);
+          setCitations((payload?.citations as { source_uri: string; quote?: string | null }[]) ?? []);
           setDone(true);
           setStreaming(false);
         }

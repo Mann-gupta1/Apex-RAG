@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const PREFIX = "/proxy/api";
 
 function tenantHeader(): Record<string, string> {
@@ -26,7 +25,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body?: any) =>
+  post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "POST", body: JSON.stringify(body ?? {}) }),
   upload: async (form: FormData) => {
     const res = await fetch(`${PREFIX}/upload`, {
@@ -39,7 +38,7 @@ export const api = {
   },
   streamChat: (
     body: { query: string; tenant_id?: string },
-    onEvent: (ev: { event: string; data: any }) => void,
+    onEvent: (ev: { event: string; data: unknown }) => void,
     onError?: (err: unknown) => void
   ): (() => void) => {
     const ctrl = new AbortController();
