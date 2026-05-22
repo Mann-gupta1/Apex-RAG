@@ -4,6 +4,7 @@ Splits the generated answer into individual claim-like sentences and, for each
 claim, asks an NLI cross-encoder whether any retrieved passage entails it.
 The final faithfulness is the mean entailment probability across claims.
 """
+
 from __future__ import annotations
 
 import re

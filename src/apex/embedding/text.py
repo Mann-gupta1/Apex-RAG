@@ -1,4 +1,5 @@
 """BGE / sentence-transformers text embedder with batched, normalised output."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -17,7 +18,9 @@ if TYPE_CHECKING:  # avoid heavy import at module load
 class TextEmbedder:
     """Wraps a SentenceTransformer with sensible defaults for retrieval."""
 
-    def __init__(self, model_name: str | None = None, *, normalize: bool = True, batch_size: int = 32) -> None:
+    def __init__(
+        self, model_name: str | None = None, *, normalize: bool = True, batch_size: int = 32
+    ) -> None:
         self.model_name = model_name or get_settings().text_embed_model
         self.normalize = normalize
         self.batch_size = batch_size

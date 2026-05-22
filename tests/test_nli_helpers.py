@@ -1,4 +1,5 @@
 """Faithfulness scorer helpers — sentence splitter + scorer behaviour with stubs."""
+
 from __future__ import annotations
 
 from apex.safety import nli
@@ -41,5 +42,7 @@ def test_faithfulness_score_with_stubbed_cross_encoder(monkeypatch):
             return _FakeCE()
 
     monkeypatch.setattr(nli, "get_faithfulness_scorer", lambda: _FakeScorer())
-    score = nli.faithfulness_score("This is one strong claim. And here is another claim.", ["supporting passage"])
+    score = nli.faithfulness_score(
+        "This is one strong claim. And here is another claim.", ["supporting passage"]
+    )
     assert 0.8 <= score <= 1.0

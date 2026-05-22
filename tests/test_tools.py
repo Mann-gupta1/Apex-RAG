@@ -1,4 +1,5 @@
 """Agent tool: safe SQL calculator."""
+
 from __future__ import annotations
 
 from apex.agent.tools import sql_calculator, web_fetch

@@ -1,4 +1,5 @@
 """LangGraph agent end-to-end with mocked Ollama + NLI + FakeVectorStore."""
+
 from __future__ import annotations
 
 import pytest
@@ -11,18 +12,26 @@ from tests.fakes import FakeVectorStore, install_fakes
 @pytest.fixture
 def seeded(monkeypatch) -> FakeVectorStore:
     store = install_fakes(monkeypatch)
-    store.upsert([
-        Chunk(
-            id="c1",
-            modality=Modality.TEXT,
-            content="Marbury v. Madison established judicial review in 1803.",
-            provenance=Provenance(source_uri="m.pdf", modality=Modality.TEXT, page=1),
-        )
-    ])
+    store.upsert(
+        [
+            Chunk(
+                id="c1",
+                modality=Modality.TEXT,
+                content="Marbury v. Madison established judicial review in 1803.",
+                provenance=Provenance(source_uri="m.pdf", modality=Modality.TEXT, page=1),
+            )
+        ]
+    )
     # Stub LLM + safety modules.
-    monkeypatch.setattr(agent_graph, "generate", lambda *a, **k: "Marbury established judicial review in 1803 [1].")
+    monkeypatch.setattr(
+        agent_graph, "generate", lambda *a, **k: "Marbury established judicial review in 1803 [1]."
+    )
     monkeypatch.setattr(agent_graph, "faithfulness_score", lambda *a, **k: 0.95)
-    monkeypatch.setattr(agent_graph, "stream", lambda *a, **k: iter(["Marbury ", "established ", "judicial ", "review."]))
+    monkeypatch.setattr(
+        agent_graph,
+        "stream",
+        lambda *a, **k: iter(["Marbury ", "established ", "judicial ", "review."]),
+    )
     return store
 
 
@@ -72,8 +81,10 @@ def test_agent_routes_deep_research(monkeypatch, seeded):
         return ResearchReport(query="q", notes=[], memo="memo body with citation", citations=[])
 
     monkeypatch.setattr("apex.agent.deep_research.deep_research", fake_deep)
-    resp = agent_graph.run_agent(ChatRequest(
-        query="Summarise and compare across all the cases and identify trends and tradeoffs in detail"
-    ))
+    resp = agent_graph.run_agent(
+        ChatRequest(
+            query="Summarise and compare across all the cases and identify trends and tradeoffs in detail"
+        )
+    )
     assert called["deep"] is True
     assert "memo" in resp.answer.lower()

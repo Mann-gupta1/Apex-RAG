@@ -3,6 +3,7 @@
 Reads `.env` (via pydantic-settings) and `config/*.yaml` (via PyYAML). Use
 `get_settings()` from anywhere in the codebase; the result is cached.
 """
+
 from __future__ import annotations
 
 from functools import lru_cache

@@ -1,4 +1,5 @@
 """FastAPI endpoint integration with mocked DB / store / LLM."""
+
 from __future__ import annotations
 
 import pytest
@@ -12,18 +13,22 @@ from tests.fakes import install_fakes
 @pytest.fixture
 def client(monkeypatch):
     store = install_fakes(monkeypatch)
-    store.upsert([
-        Chunk(
-            id="c1",
-            modality=Modality.TEXT,
-            content="Marbury v. Madison established judicial review.",
-            provenance=Provenance(source_uri="m.pdf", modality=Modality.TEXT, page=1),
-        )
-    ])
+    store.upsert(
+        [
+            Chunk(
+                id="c1",
+                modality=Modality.TEXT,
+                content="Marbury v. Madison established judicial review.",
+                provenance=Provenance(source_uri="m.pdf", modality=Modality.TEXT, page=1),
+            )
+        ]
+    )
     monkeypatch.setattr("apex.api.audit.log_event", lambda **k: None)
     monkeypatch.setattr("apex.agent.graph.generate", lambda *a, **k: "Answer with citation [1].")
     monkeypatch.setattr("apex.agent.graph.faithfulness_score", lambda *a, **k: 0.92)
-    monkeypatch.setattr("apex.agent.graph.stream", lambda *a, **k: iter(["Answer ", "with ", "citation ", "[1]."]))
+    monkeypatch.setattr(
+        "apex.agent.graph.stream", lambda *a, **k: iter(["Answer ", "with ", "citation ", "[1]."])
+    )
 
     app = build_app()
     with TestClient(app) as c:
@@ -49,7 +54,10 @@ def test_metrics_endpoint(client):
 
 
 def test_search_endpoint(client):
-    r = client.post("/api/search", json={"query": "judicial review", "top_k": 3, "use_rerank": False, "use_hyde": False})
+    r = client.post(
+        "/api/search",
+        json={"query": "judicial review", "top_k": 3, "use_rerank": False, "use_hyde": False},
+    )
     assert r.status_code == 200
     body = r.json()
     assert any("marbury" in res["chunk"]["content"].lower() for res in body["results"])

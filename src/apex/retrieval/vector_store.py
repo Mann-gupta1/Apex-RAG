@@ -3,6 +3,7 @@
 Both the pgvector and Weaviate drivers implement this surface so the rest of
 the codebase never depends on a specific backend.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

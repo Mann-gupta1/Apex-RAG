@@ -3,6 +3,7 @@
 Lifespan starts the bounded ingestion queue + Phoenix OTEL exporter.
 CORS is wide open in dev; tighten via env var for production.
 """
+
 from __future__ import annotations
 
 import os

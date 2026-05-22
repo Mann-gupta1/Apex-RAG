@@ -4,6 +4,7 @@ We don't have a live DB in CI, but we can lock down the contract that
 * the middleware never lets a request through without a resolved tenant,
 * and the resolved tenant is reflected in the response header.
 """
+
 from __future__ import annotations
 
 from fastapi.testclient import TestClient

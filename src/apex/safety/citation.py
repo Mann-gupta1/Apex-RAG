@@ -5,6 +5,7 @@ sub-sequence between the answer and the chunk (tokenwise, with min length).
 We use difflib's ``SequenceMatcher`` over lowercased word tokens which is
 robust to mild paraphrasing and avoids dragging in heavy NLP deps.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence

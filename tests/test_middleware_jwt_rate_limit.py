@@ -1,4 +1,5 @@
 """Middleware: JWT tenant resolution + in-memory token bucket rate limit."""
+
 from __future__ import annotations
 
 import time
@@ -34,7 +35,9 @@ def test_jwt_missing_tenant_claim_falls_back_to_default():
 
 def test_x_tenant_id_takes_precedence_over_jwt():
     settings = get_settings()
-    token = jwt.encode({"tenant_id": "jwt-tenant"}, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    token = jwt.encode(
+        {"tenant_id": "jwt-tenant"}, settings.jwt_secret, algorithm=settings.jwt_algorithm
+    )
     req = MagicMock()
     req.headers = {"X-Tenant-Id": "header-tenant", "Authorization": f"Bearer {token}"}
     assert middleware.resolve_tenant(req) == "header-tenant"

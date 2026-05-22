@@ -3,6 +3,7 @@
 Produces one Chunk per utterance/segment with ``timestamp_start``,
 ``timestamp_end``, and ``speaker`` recorded in the provenance.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
@@ -57,15 +58,22 @@ def _diarize(path: Path) -> list[tuple[float, float, str]]:
         logger.warning("pyannote.audio not installed; skipping diarization")
         return []
     try:
-        pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=token)
+        pipeline = Pipeline.from_pretrained(
+            "pyannote/speaker-diarization-3.1", use_auth_token=token
+        )
         diar = pipeline(str(path))
-        return [(float(t.start), float(t.end), str(spk)) for t, _, spk in diar.itertracks(yield_label=True)]
+        return [
+            (float(t.start), float(t.end), str(spk))
+            for t, _, spk in diar.itertracks(yield_label=True)
+        ]
     except Exception as exc:
         logger.warning("diarization failed: {}", exc)
         return []
 
 
-def _assign_speakers(segments: list[AudioSegment], diar: list[tuple[float, float, str]]) -> list[AudioSegment]:
+def _assign_speakers(
+    segments: list[AudioSegment], diar: list[tuple[float, float, str]]
+) -> list[AudioSegment]:
     if not diar:
         return segments
     out: list[AudioSegment] = []

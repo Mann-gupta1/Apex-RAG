@@ -4,6 +4,7 @@ A ``FakeVectorStore`` implements the ``VectorStore`` protocol with deterministic
 tokenwise scoring so we can run the full retrieval + agent pipeline without
 Postgres/pgvector. ``patch_factory`` swaps it into ``apex.retrieval.store_factory``.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable

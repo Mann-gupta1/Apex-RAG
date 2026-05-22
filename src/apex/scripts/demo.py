@@ -3,6 +3,7 @@
 Designed to be the script behind the 5-minute screen-recording asset
 described in ``docs/demo_script.md``.
 """
+
 from __future__ import annotations
 
 import sys
@@ -30,7 +31,9 @@ def main() -> int:
     console.rule("[bold]Apex RAG — demo")
     raw = Path("data/raw_docs")
     if not any(raw.rglob("*")):
-        console.print("[yellow]No raw docs found; run `make seed` or `python -m apex.scripts.download_demo_corpus` first.[/]")
+        console.print(
+            "[yellow]No raw docs found; run `make seed` or `python -m apex.scripts.download_demo_corpus` first.[/]"
+        )
         return 1
 
     console.print(Panel(f"Ingesting [b]{raw}[/]", title="Step 1 / 3"))

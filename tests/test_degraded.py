@@ -1,4 +1,5 @@
 """Degraded-mode response builder."""
+
 from __future__ import annotations
 
 from apex.api.degraded import degraded_chat

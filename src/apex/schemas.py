@@ -1,4 +1,5 @@
 """Pydantic data models shared across ingestion, retrieval, agent, and API layers."""
+
 from __future__ import annotations
 
 from datetime import datetime

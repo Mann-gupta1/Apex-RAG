@@ -11,6 +11,7 @@ Two downstream datasets are produced from the ``feedback`` table:
 These exports are deliberately idempotent and stream-friendly so they can be
 run on a cron / nightly.
 """
+
 from __future__ import annotations
 
 import json
@@ -65,7 +66,9 @@ def _iter_feedback() -> Iterator[dict]:
                 "tenant_id": r.tenant_id,
                 "query": r.query,
                 "response": r.response,
-                "chunk_ids": r.chunk_ids if isinstance(r.chunk_ids, list) else json.loads(r.chunk_ids or "[]"),
+                "chunk_ids": r.chunk_ids
+                if isinstance(r.chunk_ids, list)
+                else json.loads(r.chunk_ids or "[]"),
                 "rating": int(r.rating),
                 "comment": r.comment,
                 "created_at": r.created_at.isoformat() if r.created_at else None,
@@ -75,7 +78,9 @@ def _iter_feedback() -> Iterator[dict]:
 def export_reranker_pairs(out_path: Path) -> int:
     """Group feedback by query; positives are chunks from up-voted responses,
     negatives are chunks from down-voted responses for the same query."""
-    grouped: dict[str, dict[str, set[str]]] = defaultdict(lambda: {"positive": set(), "negative": set()})
+    grouped: dict[str, dict[str, set[str]]] = defaultdict(
+        lambda: {"positive": set(), "negative": set()}
+    )
     for row in _iter_feedback():
         bucket = "positive" if row["rating"] > 0 else ("negative" if row["rating"] < 0 else None)
         if bucket is None:
@@ -119,13 +124,17 @@ def export_dpo_dataset(out_path: Path) -> int:
         for query, rs in by_query.items():
             for chosen in rs["chosen"]:
                 for rejected in rs["rejected"]:
-                    fh.write(json.dumps({"prompt": query, "chosen": chosen, "rejected": rejected}) + "\n")
+                    fh.write(
+                        json.dumps({"prompt": query, "chosen": chosen, "rejected": rejected}) + "\n"
+                    )
                     n += 1
     logger.info("DPO dataset: {} pairs -> {}", n, out_path)
     return n
 
 
-def export_datasets(reranker_out: Path | None = None, dpo_out: Path | None = None) -> dict[str, int]:
+def export_datasets(
+    reranker_out: Path | None = None, dpo_out: Path | None = None
+) -> dict[str, int]:
     rr = reranker_out or Path("data/reranker_finetune.jsonl")
     dpo = dpo_out or Path("data/dpo_dataset.jsonl")
     return {

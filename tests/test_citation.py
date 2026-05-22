@@ -1,4 +1,5 @@
 """Citation span extraction."""
+
 from __future__ import annotations
 
 from apex.safety.citation import extract_citations

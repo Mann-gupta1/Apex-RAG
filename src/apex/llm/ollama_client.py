@@ -4,6 +4,7 @@ We avoid hard-depending on the ``ollama`` python SDK so this module remains
 importable when only ``httpx`` is installed. The SDK is used opportunistically
 if it happens to be available; otherwise we hit the REST API directly.
 """
+
 from __future__ import annotations
 
 import json

@@ -1,4 +1,5 @@
 """open_clip image embedder. Used for both raw images and video keyframes."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

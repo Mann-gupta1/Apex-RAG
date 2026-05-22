@@ -1,4 +1,5 @@
 """Agent router classification."""
+
 from __future__ import annotations
 
 from apex.agent.router import classify

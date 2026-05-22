@@ -9,6 +9,7 @@ Output:
   recall_at_10
 * prints a summary table at the end.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -42,14 +43,19 @@ def _hamming(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 
 def recall_at_k(gold: np.ndarray, candidate: np.ndarray, k: int = 10) -> float:
-    overlaps = [len(set(gold[i, :k].tolist()) & set(candidate[i, :k].tolist())) for i in range(gold.shape[0])]
+    overlaps = [
+        len(set(gold[i, :k].tolist()) & set(candidate[i, :k].tolist()))
+        for i in range(gold.shape[0])
+    ]
     return float(np.mean(overlaps) / k)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--queries", default=None)
-    parser.add_argument("--passages", default=None, help="JSON list of passages; defaults to golden answers")
+    parser.add_argument(
+        "--passages", default=None, help="JSON list of passages; defaults to golden answers"
+    )
     parser.add_argument("--top-k", type=int, default=10)
     parser.add_argument("--output", default="notebooks/quantization_report.csv")
     args = parser.parse_args()

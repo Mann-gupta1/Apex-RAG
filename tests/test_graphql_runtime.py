@@ -1,4 +1,5 @@
 """Execute GraphQL queries through the schema with an in-memory store."""
+
 from __future__ import annotations
 
 import pytest
@@ -11,20 +12,22 @@ from tests.fakes import FakeVectorStore, install_fakes
 @pytest.fixture
 def fake_store(monkeypatch) -> FakeVectorStore:
     store = install_fakes(monkeypatch)
-    store.upsert([
-        Chunk(
-            id="c1",
-            modality=Modality.TEXT,
-            content="Marbury v. Madison established judicial review.",
-            provenance=Provenance(source_uri="m.pdf", modality=Modality.TEXT, page=1),
-        ),
-        Chunk(
-            id="c2",
-            modality=Modality.TEXT,
-            content="Brown v. Board overturned Plessy.",
-            provenance=Provenance(source_uri="b.pdf", modality=Modality.TEXT, page=2),
-        ),
-    ])
+    store.upsert(
+        [
+            Chunk(
+                id="c1",
+                modality=Modality.TEXT,
+                content="Marbury v. Madison established judicial review.",
+                provenance=Provenance(source_uri="m.pdf", modality=Modality.TEXT, page=1),
+            ),
+            Chunk(
+                id="c2",
+                modality=Modality.TEXT,
+                content="Brown v. Board overturned Plessy.",
+                provenance=Provenance(source_uri="b.pdf", modality=Modality.TEXT, page=2),
+            ),
+        ]
+    )
     return store
 
 

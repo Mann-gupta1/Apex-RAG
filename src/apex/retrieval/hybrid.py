@@ -4,6 +4,7 @@ RRF: ``score(d) = Σ_r 1 / (k + rank_r(d))``  where k defaults to 60.
 This is a strong, parameter-light fusion and works whenever the two lists are
 ranked but have incomparable score scales (which is exactly our case).
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -66,8 +67,12 @@ def hybrid_search(
     embedder = get_text_embedder()
 
     embedding = embedder.encode_query(query).tolist()
-    dense = store.dense_search(embedding, tenant_id=tenant_id, modalities=modalities, top_k=dense_top_k)
-    sparse = store.sparse_search(query, tenant_id=tenant_id, modalities=modalities, top_k=sparse_top_k)
+    dense = store.dense_search(
+        embedding, tenant_id=tenant_id, modalities=modalities, top_k=dense_top_k
+    )
+    sparse = store.sparse_search(
+        query, tenant_id=tenant_id, modalities=modalities, top_k=sparse_top_k
+    )
 
     image_results: list[RetrievalHit] = []
     if modalities and (Modality.IMAGE in modalities or Modality.VIDEO in modalities):
@@ -75,7 +80,9 @@ def hybrid_search(
             from apex.embedding.image import get_image_embedder
 
             clip_vec = get_image_embedder().encode_text([query])[0].tolist()
-            image_results = store.dense_image_search(clip_vec, tenant_id=tenant_id, top_k=dense_top_k)
+            image_results = store.dense_image_search(
+                clip_vec, tenant_id=tenant_id, top_k=dense_top_k
+            )
         except Exception as exc:
             logger.debug("image-modality dense search skipped: {}", exc)
 

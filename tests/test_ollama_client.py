@@ -1,4 +1,5 @@
 """Ollama client retry + parsing logic (no live Ollama needed)."""
+
 from __future__ import annotations
 
 import json
@@ -17,7 +18,9 @@ class _FakeResponse:
 
     def raise_for_status(self) -> None:
         if self.status_code >= 400:
-            raise httpx.HTTPStatusError("err", request=MagicMock(), response=MagicMock(status_code=self.status_code))
+            raise httpx.HTTPStatusError(
+                "err", request=MagicMock(), response=MagicMock(status_code=self.status_code)
+            )
 
     def json(self) -> dict:
         return self._payload
@@ -78,11 +81,13 @@ def test_health_returns_false_on_error(monkeypatch):
 
 
 def test_stream_yields_token_deltas(monkeypatch):
-    chunks_iter = iter([
-        json.dumps({"response": "Hello"}),
-        json.dumps({"response": " world"}),
-        json.dumps({"done": True}),
-    ])
+    chunks_iter = iter(
+        [
+            json.dumps({"response": "Hello"}),
+            json.dumps({"response": " world"}),
+            json.dumps({"done": True}),
+        ]
+    )
 
     class _StreamCtx:
         def __init__(self):
@@ -125,7 +130,9 @@ def test_generate_includes_system_and_stop(monkeypatch):
             return self._response
 
     monkeypatch.setattr(ollama_client.httpx, "Client", lambda *a, **k: C(resp))
-    ollama_client.generate("hi", system="you are helpful", stop=["END"], max_tokens=5, temperature=0.7)
+    ollama_client.generate(
+        "hi", system="you are helpful", stop=["END"], max_tokens=5, temperature=0.7
+    )
     assert captured["payload"]["system"] == "you are helpful"
     assert captured["payload"]["options"]["stop"] == ["END"]
     assert captured["payload"]["options"]["num_predict"] == 5

@@ -3,6 +3,7 @@
 If the network is unavailable the script writes a small synthetic fallback so
 that the rest of the ingestion pipeline always has something to work with.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -72,7 +73,9 @@ def _write_synthetic_fallback(root: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Download Apex RAG demo corpus")
-    parser.add_argument("--root", default=None, help="Override target root (defaults to data/raw_docs)")
+    parser.add_argument(
+        "--root", default=None, help="Override target root (defaults to data/raw_docs)"
+    )
     args = parser.parse_args()
 
     settings = get_settings()

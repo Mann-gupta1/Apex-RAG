@@ -9,6 +9,7 @@ This module is intentionally gated by the ``advanced.late_interaction.enabled``
 flag in ``config/retrieval.yaml`` because the per-token forward pass is
 expensive on CPU; it's wired so that interview reviewers can read and run it.
 """
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -56,7 +57,9 @@ class LateInteractionScorer:
         sims = q_emb @ p_emb.T  # (q_tokens, p_tokens)
         return float(sims.max(axis=1).sum())  # MaxSim summation
 
-    def rerank(self, query: str, hits: list[RetrievalHit], *, top_k: int | None = None) -> list[RetrievalHit]:
+    def rerank(
+        self, query: str, hits: list[RetrievalHit], *, top_k: int | None = None
+    ) -> list[RetrievalHit]:
         if not hits:
             return hits
         rescored = [
@@ -80,4 +83,9 @@ def get_late_interaction_scorer() -> LateInteractionScorer:
 
 
 def is_enabled() -> bool:
-    return bool(load_yaml_config("retrieval").get("advanced", {}).get("late_interaction", {}).get("enabled", False))
+    return bool(
+        load_yaml_config("retrieval")
+        .get("advanced", {})
+        .get("late_interaction", {})
+        .get("enabled", False)
+    )

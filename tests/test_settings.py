@@ -1,4 +1,5 @@
 """Settings + YAML config loader."""
+
 from __future__ import annotations
 
 from apex.settings import get_settings, load_yaml_config

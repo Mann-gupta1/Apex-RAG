@@ -2,6 +2,7 @@
 
 Each tool returns a JSON-serializable dict so the agent can reason about it.
 """
+
 from __future__ import annotations
 
 import ast
@@ -26,8 +27,13 @@ class ToolResult:
 
 # ---------- sql_calculator: safe expression eval ----------
 _ALLOWED_BINOPS = {
-    ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul, ast.Div: op.truediv,
-    ast.Mod: op.mod, ast.Pow: op.pow, ast.FloorDiv: op.floordiv,
+    ast.Add: op.add,
+    ast.Sub: op.sub,
+    ast.Mult: op.mul,
+    ast.Div: op.truediv,
+    ast.Mod: op.mod,
+    ast.Pow: op.pow,
+    ast.FloorDiv: op.floordiv,
 }
 _ALLOWED_UNARY = {ast.UAdd: op.pos, ast.USub: op.neg}
 

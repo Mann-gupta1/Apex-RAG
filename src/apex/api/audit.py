@@ -2,6 +2,7 @@
 
 The table schema lives in alembic/versions/0001_initial_schema.py.
 """
+
 from __future__ import annotations
 
 import json

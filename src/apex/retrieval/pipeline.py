@@ -9,6 +9,7 @@ This is the function the API and the agent both call. It encapsulates:
 5. Optional cross-encoder rerank of the fused list.
 6. Optional ColBERT-style late-interaction rescoring (gated by config).
 """
+
 from __future__ import annotations
 
 import time
@@ -43,8 +44,14 @@ def run_search(req: SearchRequest) -> SearchResponse:
     started = time.perf_counter()
 
     plan = adaptive.plan(req.query)
-    use_rerank = req.use_rerank if req.use_rerank is not None else (plan.use_rerank and settings.enable_reranker)
-    use_hyde = req.use_hyde if req.use_hyde is not None else (plan.use_hyde and settings.enable_hyde)
+    use_rerank = (
+        req.use_rerank
+        if req.use_rerank is not None
+        else (plan.use_rerank and settings.enable_reranker)
+    )
+    use_hyde = (
+        req.use_hyde if req.use_hyde is not None else (plan.use_hyde and settings.enable_hyde)
+    )
     final_top_k = req.top_k or plan.top_k
 
     queries = [req.query]
@@ -81,7 +88,9 @@ def run_search(req: SearchRequest) -> SearchResponse:
 
     if late_interaction.is_enabled() and fused:
         try:
-            fused = late_interaction.get_late_interaction_scorer().rerank(req.query, fused, top_k=final_top_k)
+            fused = late_interaction.get_late_interaction_scorer().rerank(
+                req.query, fused, top_k=final_top_k
+            )
         except Exception as exc:
             logger.warning("late-interaction rescoring skipped: {}", exc)
 

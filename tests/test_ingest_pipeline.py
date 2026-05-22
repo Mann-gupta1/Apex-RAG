@@ -1,4 +1,5 @@
 """End-to-end ingestion pipeline for plain-text files (no heavy ML deps)."""
+
 from __future__ import annotations
 
 import pytest

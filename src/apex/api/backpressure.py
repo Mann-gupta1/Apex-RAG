@@ -3,6 +3,7 @@
 When the queue is full callers receive a 429 with a Retry-After hint instead
 of blocking. The queue worker runs in the same event loop as the app.
 """
+
 from __future__ import annotations
 
 import asyncio

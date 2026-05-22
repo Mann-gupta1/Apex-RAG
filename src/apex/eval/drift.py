@@ -7,6 +7,7 @@ distribution computed at the time of the last baseline.
 The output is a JSON report in ``data/eval_runs/drift/`` that the Eval tab
 in the Next.js UI surfaces.
 """
+
 from __future__ import annotations
 
 import json
@@ -82,7 +83,9 @@ def run_drift() -> dict[str, Any]:
     recent = _recent_queries(window_days)
     reference = _reference_corpus()
     if not recent or not reference:
-        logger.warning("drift: insufficient data (recent={}, reference={})", len(recent), len(reference))
+        logger.warning(
+            "drift: insufficient data (recent={}, reference={})", len(recent), len(reference)
+        )
         return {"status": "insufficient_data", "recent": len(recent), "reference": len(reference)}
 
     embedder = get_text_embedder()
@@ -100,7 +103,8 @@ def run_drift() -> dict[str, Any]:
         "stats": stats,
         "threshold_p_value": cfg.get("ks_p_value_threshold", 0.05),
         "alert": (stats.get("ks_p_min", 1.0) < cfg.get("ks_p_value_threshold", 0.05))
-                  if "ks_p_min" in stats else (stats.get("cosine_drift", 0.0) > 0.2),
+        if "ks_p_min" in stats
+        else (stats.get("cosine_drift", 0.0) > 0.2),
     }
     (out / f"drift_{int(datetime.now(timezone.utc).timestamp())}.json").write_text(
         json.dumps(report, indent=2), encoding="utf-8"

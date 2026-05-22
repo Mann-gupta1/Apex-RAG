@@ -6,6 +6,7 @@ Workflow:
     3. gap-finder: LLM proposes the next sub-question, or DONE.
     4. synthesise: LLM writes the structured memo with [#] citations.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -45,7 +46,7 @@ def _plan(query: str) -> list[str]:
 def _summarise(question: str, chunks: list[RetrievedChunk]) -> str:
     if not chunks:
         return ""
-    context = "\n".join(f"[{i+1}] {c.chunk.content[:600]}" for i, c in enumerate(chunks[:5]))
+    context = "\n".join(f"[{i + 1}] {c.chunk.content[:600]}" for i, c in enumerate(chunks[:5]))
     prompt = (
         f"Summarise what the following context tells us about: {question}\n\n"
         f"Context:\n{context}\n\nSummary (3 sentences, cite with [#]):"
@@ -69,7 +70,9 @@ def _synthesise(query: str, notes: list[ResearchNote]) -> str:
     counter = 1
     for n in notes:
         for c in n.chunks[:3]:
-            evidence_blocks.append(f"[{counter}] ({c.chunk.provenance.source_uri}) {c.chunk.content[:400]}")
+            evidence_blocks.append(
+                f"[{counter}] ({c.chunk.provenance.source_uri}) {c.chunk.content[:400]}"
+            )
             counter += 1
     evidence = "\n".join(evidence_blocks) or "(no evidence collected)"
     return generate(
@@ -108,7 +111,9 @@ def deep_research(
     for n in notes:
         for c in n.chunks[:3]:
             citations.append(c.chunk.provenance.source_uri)
-    return ResearchReport(query=query, notes=notes, memo=memo, citations=list(dict.fromkeys(citations)))
+    return ResearchReport(
+        query=query, notes=notes, memo=memo, citations=list(dict.fromkeys(citations))
+    )
 
 
 def stream_deep_research(query: str, *, tenant_id: str = "default") -> Iterator[dict]:
@@ -121,7 +126,9 @@ def stream_deep_research(query: str, *, tenant_id: str = "default") -> Iterator[
         yield {"event": "retrieve_start", "subquestion": sub}
         results = run_search(SearchRequest(query=sub, tenant_id=tenant_id, top_k=6))
         notes.append(
-            ResearchNote(sub_question=sub, chunks=results.results, summary=_summarise(sub, results.results))
+            ResearchNote(
+                sub_question=sub, chunks=results.results, summary=_summarise(sub, results.results)
+            )
         )
         yield {"event": "subquestion_done", "subquestion": sub, "n_chunks": len(results.results)}
     yield {"event": "synthesise_start"}

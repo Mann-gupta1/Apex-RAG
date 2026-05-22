@@ -4,6 +4,7 @@
 modality-aware chunking + contextual retrieval, computes embeddings, and
 persists the result to the configured `VectorStore`.
 """
+
 from __future__ import annotations
 
 import uuid
@@ -68,7 +69,10 @@ def _embed(chunks: list[Chunk]) -> list[Chunk]:
             from apex.embedding.text import get_text_embedder
 
             embedder = get_text_embedder()
-            text_inputs = [(c.context_summary + " | " + c.content if c.context_summary else c.content) for _, c in text_items]
+            text_inputs = [
+                (c.context_summary + " | " + c.content if c.context_summary else c.content)
+                for _, c in text_items
+            ]
             text_vecs = embedder.encode(text_inputs)
         except Exception as exc:
             logger.warning("text embedding skipped: {}", exc)
@@ -141,8 +145,12 @@ def ingest_file(path: Path, *, tenant_id: str = "default") -> IngestionResult:
     embedded = _embed(contextual)
     n = _store(embedded) if embedded else 0
 
-    logger.info("ingest done job={} chunks={} elapsed={:.2f}s",
-                job_id, n, (datetime.now(timezone.utc) - started).total_seconds())
+    logger.info(
+        "ingest done job={} chunks={} elapsed={:.2f}s",
+        job_id,
+        n,
+        (datetime.now(timezone.utc) - started).total_seconds(),
+    )
     return IngestionResult(source_uri=str(path), modality=modality, chunks_created=n, job_id=job_id)
 
 

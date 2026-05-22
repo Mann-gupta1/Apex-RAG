@@ -8,6 +8,7 @@ We rely on ``dict.setdefault`` (atomic in CPython) to register the in-flight
 future, so no asyncio.Lock is needed — and importantly it doesn't bind to a
 specific event loop, which makes the module pytest-friendly.
 """
+
 from __future__ import annotations
 
 import asyncio

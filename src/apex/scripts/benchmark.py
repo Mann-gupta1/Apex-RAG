@@ -5,6 +5,7 @@ Outputs:
 * ``notebooks/benchmark_report.ipynb`` — notebook scaffold with charts.
 * ``data/eval_runs/benchmark_<ts>.json`` — machine-readable run.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -22,7 +23,7 @@ from apex.settings import get_settings
 
 VARIANTS = [
     {"id": "naive", "use_hyde": False, "use_rerank": False, "use_multi_query": False, "top_k": 5},
-    {"id": "apex",  "use_hyde": True,  "use_rerank": True,  "use_multi_query": True,  "top_k": 6},
+    {"id": "apex", "use_hyde": True, "use_rerank": True, "use_multi_query": True, "top_k": 6},
 ]
 
 # Committed snapshot for offline / CI (`make benchmark-mock`). Refresh with live stack.
@@ -90,7 +91,13 @@ def _latency_profile(variant: dict) -> dict[str, float]:
 
 
 def _render_table(variants: list[dict], runs: dict[str, dict]) -> str:
-    metric_names = ["context_recall", "context_precision", "faithfulness", "answer_relevance", "answer_correctness"]
+    metric_names = [
+        "context_recall",
+        "context_precision",
+        "faithfulness",
+        "answer_relevance",
+        "answer_correctness",
+    ]
     headers = ["Metric"] + [v["id"] for v in variants] + ["Δ (apex - naive)"]
     lines = ["| " + " | ".join(headers) + " |", "|" + "|".join(["---"] * len(headers)) + "|"]
 
@@ -114,26 +121,39 @@ def _render_table(variants: list[dict], runs: dict[str, dict]) -> str:
     lines.append("|---|---|---|---|---|---|")
     for v in variants:
         lp = runs[v["id"]]["latency"]
-        lines.append(f"| {v['id']} | {lp['n']} | {lp['p50_ms']} | {lp['p95_ms']} | {lp['p99_ms']} | {lp['mean_ms']} |")
+        lines.append(
+            f"| {v['id']} | {lp['n']} | {lp['p50_ms']} | {lp['p95_ms']} | {lp['p99_ms']} | {lp['mean_ms']} |"
+        )
     return "\n".join(lines)
 
 
 def _write_notebook(report_path: Path) -> Path:
     nb = {
         "cells": [
-            {"cell_type": "markdown", "metadata": {},
-             "source": ["# Apex RAG Benchmark\n", "Naive RAG vs Apex RAG comparison."]},
-            {"cell_type": "code", "metadata": {}, "outputs": [], "execution_count": None,
-             "source": [
-                 "import json, pandas as pd, matplotlib.pyplot as plt\n",
-                 f"data = json.load(open('{report_path.as_posix()}'))\n",
-                 "df = pd.DataFrame({v: data['runs'][v]['metrics'] for v in data['runs']}).T\n",
-                 "df.plot(kind='bar', figsize=(10,5), title='RAGAS metrics: naive vs apex')\n",
-                 "plt.tight_layout(); plt.savefig('benchmark_metrics.png'); plt.show()\n",
-             ]},
+            {
+                "cell_type": "markdown",
+                "metadata": {},
+                "source": ["# Apex RAG Benchmark\n", "Naive RAG vs Apex RAG comparison."],
+            },
+            {
+                "cell_type": "code",
+                "metadata": {},
+                "outputs": [],
+                "execution_count": None,
+                "source": [
+                    "import json, pandas as pd, matplotlib.pyplot as plt\n",
+                    f"data = json.load(open('{report_path.as_posix()}'))\n",
+                    "df = pd.DataFrame({v: data['runs'][v]['metrics'] for v in data['runs']}).T\n",
+                    "df.plot(kind='bar', figsize=(10,5), title='RAGAS metrics: naive vs apex')\n",
+                    "plt.tight_layout(); plt.savefig('benchmark_metrics.png'); plt.show()\n",
+                ],
+            },
         ],
-        "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}},
-        "nbformat": 4, "nbformat_minor": 5,
+        "metadata": {
+            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
     }
     out = Path("notebooks/benchmark_report.ipynb")
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -183,9 +203,7 @@ def main() -> int:
         f"_Generated at {datetime.now(timezone.utc).isoformat()}_\n\n"
         + mode_note
         + "Compares a naive single-vector top-k baseline against the full Apex "
-        "RAG pipeline (HyDE rewriting + hybrid + cross-encoder rerank + agent).\n\n"
-        + md
-        + "\n\n"
+        "RAG pipeline (HyDE rewriting + hybrid + cross-encoder rerank + agent).\n\n" + md + "\n\n"
         "See `notebooks/benchmark_report.ipynb` for charts and the raw JSON "
         f"at `{report_path.as_posix()}`.\n"
     )

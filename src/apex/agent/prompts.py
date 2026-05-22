@@ -4,6 +4,7 @@ Centralised so they can be A/B-tested + version-controlled. Each prompt
 strives to be deterministic, citation-friendly, and short enough for a small
 local model (llama3.1:8b) to follow reliably.
 """
+
 from __future__ import annotations
 
 SYSTEM_GROUNDED = (

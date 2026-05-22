@@ -3,6 +3,7 @@
 Heuristic + LLM-light classifier that chooses ``top_k`` and whether to rerank
 based on the query's complexity. Cheap queries skip the rerank entirely.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -20,7 +21,16 @@ class RetrievalPlan:
 
 
 SIMPLE_MARKERS = {"what is", "who is", "define", "when was", "where is"}
-COMPLEX_MARKERS = {"compare", "contrast", "summarise", "summarize", "across", "between", "trade-off", "tradeoff"}
+COMPLEX_MARKERS = {
+    "compare",
+    "contrast",
+    "summarise",
+    "summarize",
+    "across",
+    "between",
+    "trade-off",
+    "tradeoff",
+}
 
 
 def classify(query: str) -> str:

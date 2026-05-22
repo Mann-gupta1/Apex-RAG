@@ -3,6 +3,7 @@
 Produces a Chunk per image with the OCR'd text (if any) as ``content`` and the
 image source path retained for downstream CLIP embedding.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable

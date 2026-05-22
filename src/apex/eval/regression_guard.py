@@ -3,6 +3,7 @@
 Compares the latest eval run against ``data/eval_baseline.json`` and exits
 non-zero if any tracked metric dropped by more than ``threshold`` (default 5%).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -28,7 +29,9 @@ def _latest_run(results_dir: Path) -> dict | None:
 
 
 def compare(latest: dict, baseline: dict, *, threshold: float, tracked: list[str]) -> dict:
-    base_metrics = baseline.get("metrics") if isinstance(baseline.get("metrics"), dict) else baseline
+    base_metrics = (
+        baseline.get("metrics") if isinstance(baseline.get("metrics"), dict) else baseline
+    )
     latest_metrics = latest.get("metrics", {})
     diffs = {}
     failures = []
@@ -51,10 +54,20 @@ def main() -> int:
 
     settings = get_settings()
     eval_cfg = load_yaml_config("eval")
-    baseline_path = Path(args.baseline or eval_cfg.get("dataset", {}).get("baseline_path", settings.eval_baseline_path))
-    threshold = float(args.threshold or eval_cfg.get("regression", {}).get("threshold", settings.eval_regression_threshold))
-    tracked = eval_cfg.get("regression", {}).get("tracked_metrics", ["faithfulness", "context_recall", "answer_relevance"])
-    results_dir = Path(args.results_dir or eval_cfg.get("dataset", {}).get("results_dir", "data/eval_runs"))
+    baseline_path = Path(
+        args.baseline
+        or eval_cfg.get("dataset", {}).get("baseline_path", settings.eval_baseline_path)
+    )
+    threshold = float(
+        args.threshold
+        or eval_cfg.get("regression", {}).get("threshold", settings.eval_regression_threshold)
+    )
+    tracked = eval_cfg.get("regression", {}).get(
+        "tracked_metrics", ["faithfulness", "context_recall", "answer_relevance"]
+    )
+    results_dir = Path(
+        args.results_dir or eval_cfg.get("dataset", {}).get("results_dir", "data/eval_runs")
+    )
 
     baseline = _load_baseline(baseline_path)
     latest = _latest_run(results_dir)
@@ -64,14 +77,19 @@ def main() -> int:
     if not baseline:
         logger.warning("no baseline at {}; recording latest as baseline", baseline_path)
         baseline_path.parent.mkdir(parents=True, exist_ok=True)
-        baseline_path.write_text(json.dumps({"metrics": latest.get("metrics", {})}, indent=2), encoding="utf-8")
+        baseline_path.write_text(
+            json.dumps({"metrics": latest.get("metrics", {})}, indent=2), encoding="utf-8"
+        )
         return 0
 
     report = compare(latest, baseline, threshold=threshold, tracked=tracked)
     for name, d in report["diffs"].items():
         logger.info(
             "{:<22} baseline={:.4f} latest={:.4f} delta={:+.4f}",
-            name, d["baseline"], d["latest"], d["delta"],
+            name,
+            d["baseline"],
+            d["latest"],
+            d["delta"],
         )
     if report["failures"]:
         logger.error("regression guard FAILED on: {}", ", ".join(report["failures"]))

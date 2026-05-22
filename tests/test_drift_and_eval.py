@@ -1,4 +1,5 @@
 """Eval helpers: drift detector + regression guard + RAGAS fallback."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -53,12 +54,30 @@ def test_drift_ks_statistic_high_for_shifted():
 
 def test_ragas_fallback_returns_metrics_list():
     records = [
-        {"question": "q1", "answer": "a1 token", "contexts": ["a1 token context"], "ground_truth": "a1 token", "expected_sources": []},
-        {"question": "q2", "answer": "wrong", "contexts": ["other context"], "ground_truth": "right", "expected_sources": []},
+        {
+            "question": "q1",
+            "answer": "a1 token",
+            "contexts": ["a1 token context"],
+            "ground_truth": "a1 token",
+            "expected_sources": [],
+        },
+        {
+            "question": "q2",
+            "answer": "wrong",
+            "contexts": ["other context"],
+            "ground_truth": "right",
+            "expected_sources": [],
+        },
     ]
     metrics = _fallback_metrics(records)
     names = {m.name for m in metrics}
-    assert {"faithfulness", "context_recall", "context_precision", "answer_relevance", "answer_correctness"} <= names
+    assert {
+        "faithfulness",
+        "context_recall",
+        "context_precision",
+        "answer_relevance",
+        "answer_correctness",
+    } <= names
     for m in metrics:
         assert 0.0 <= m.value <= 1.0
 

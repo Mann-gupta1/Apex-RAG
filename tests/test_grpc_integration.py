@@ -1,4 +1,5 @@
 """gRPC integration tests — mock servicer offline; live server test skipped."""
+
 from __future__ import annotations
 
 import grpc
@@ -7,7 +8,7 @@ import pytest
 pytest.importorskip("apex.api.apex_pb2")
 pytest.importorskip("apex.api.apex_pb2_grpc")
 
-from apex.api import apex_pb2, apex_pb2_grpc  # noqa: E402
+from apex.api import apex_pb2, apex_pb2_grpc
 
 
 class _FakeRpcContext:

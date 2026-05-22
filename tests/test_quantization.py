@@ -1,4 +1,5 @@
 """Embedding quantization math (no model deps required)."""
+
 from __future__ import annotations
 
 import numpy as np

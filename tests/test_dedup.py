@@ -1,4 +1,5 @@
 """In-flight request coalescing."""
+
 from __future__ import annotations
 
 import asyncio

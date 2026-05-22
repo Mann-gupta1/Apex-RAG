@@ -6,6 +6,7 @@ Exposes:
 - ``mutation.submitFeedback(...)``
 - ``subscription.chatStream(query)`` for streaming agent events.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -197,8 +198,15 @@ class Subscription:
         req = ChatRequest(query=query, tenant_id=tenant_id)
 
         if not llm_healthy():
-            search_resp = await asyncio.to_thread(run_search, SearchRequest(query=query, tenant_id=tenant_id))
-            yield json.dumps({"event": "degraded", "payload": degraded_chat(req, search_resp.results).model_dump()})
+            search_resp = await asyncio.to_thread(
+                run_search, SearchRequest(query=query, tenant_id=tenant_id)
+            )
+            yield json.dumps(
+                {
+                    "event": "degraded",
+                    "payload": degraded_chat(req, search_resp.results).model_dump(),
+                }
+            )
             return
 
         loop = asyncio.get_running_loop()

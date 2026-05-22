@@ -11,6 +11,7 @@ LLM-generated context summary is prepended to each text chunk before
 embedding. The LLM call is gated by ``enable_contextual_retrieval`` so the
 pipeline still runs without Ollama available.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -46,7 +47,9 @@ def _chunk_text(parent: Chunk, chunk_size: int, overlap: int) -> list[Chunk]:
         Chunk(
             modality=parent.modality,
             content=piece,
-            provenance=parent.provenance.model_copy(update={"extra": {**parent.provenance.extra, "chunk_index": i}}),
+            provenance=parent.provenance.model_copy(
+                update={"extra": {**parent.provenance.extra, "chunk_index": i}}
+            ),
         )
         for i, piece in enumerate(pieces)
     ]
@@ -106,7 +109,9 @@ def contextualize(chunks: list[Chunk], *, doc_summary: str | None = None) -> lis
             out.append(c)
             continue
         try:
-            ctx = generate(_contextual_prompt(summary, c.content), max_tokens=80, temperature=0.0).strip()
+            ctx = generate(
+                _contextual_prompt(summary, c.content), max_tokens=80, temperature=0.0
+            ).strip()
             ctx = ctx.replace("\n", " ").strip()
         except Exception as exc:
             logger.debug("contextualize fallback for one chunk: {}", exc)

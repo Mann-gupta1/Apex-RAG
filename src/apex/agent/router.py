@@ -1,4 +1,5 @@
 """Query router: classify a query into one of {factual, analytical, visual, deep_research}."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,14 +15,45 @@ class RouteDecision:
     reason: str
 
 
-_VISUAL_TOKENS = {"image", "photo", "picture", "exhibit", "video", "deposition", "screenshot", "timestamp"}
+_VISUAL_TOKENS = {
+    "image",
+    "photo",
+    "picture",
+    "exhibit",
+    "video",
+    "deposition",
+    "screenshot",
+    "timestamp",
+}
 _DEEP_RESEARCH_MARKERS = {
-    "summarise", "summarize", "memo", "comprehensive", "across", "trends", "synthesise",
-    "synthesize", "report on", "compile", "literature review", "case law", "compare and contrast",
+    "summarise",
+    "summarize",
+    "memo",
+    "comprehensive",
+    "across",
+    "trends",
+    "synthesise",
+    "synthesize",
+    "report on",
+    "compile",
+    "literature review",
+    "case law",
+    "compare and contrast",
 }
 _ANALYTICAL_MARKERS = {
-    "compare", "contrast", "why", "how does", "explain", "tradeoff", "trade-off", "impact",
-    "implication", "consequence", "vs ", " versus ", "relationship between",
+    "compare",
+    "contrast",
+    "why",
+    "how does",
+    "explain",
+    "tradeoff",
+    "trade-off",
+    "impact",
+    "implication",
+    "consequence",
+    "vs ",
+    " versus ",
+    "relationship between",
 }
 
 
@@ -44,7 +76,9 @@ def classify(query: str) -> RouteDecision:
             mods = [Modality.VIDEO]
         return RouteDecision(kind="visual", modalities=mods, reason="visual keywords detected")
     if analytical_hit:
-        return RouteDecision(kind="analytical", modalities=None, reason="analytical keywords detected")
+        return RouteDecision(
+            kind="analytical", modalities=None, reason="analytical keywords detected"
+        )
     return RouteDecision(kind="factual", modalities=None, reason="default factual")
 
 

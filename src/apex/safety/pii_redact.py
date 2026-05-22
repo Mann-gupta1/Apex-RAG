@@ -8,6 +8,7 @@ Used at two points:
 When Presidio is unavailable we fall back to a small set of regex patterns so
 the safety story degrades gracefully.
 """
+
 from __future__ import annotations
 
 import re
@@ -74,7 +75,9 @@ def _redact_with_regex(text: str) -> RedactionResult:
     entities: list[dict] = []
     for label, pat in _FALLBACK_PATTERNS:
         for m in pat.finditer(text):
-            entities.append({"entity_type": label, "start": m.start(), "end": m.end(), "score": 0.5})
+            entities.append(
+                {"entity_type": label, "start": m.start(), "end": m.end(), "score": 0.5}
+            )
         out = pat.sub(f"<{label}>", out)
     return RedactionResult(text=out, entities=entities)
 

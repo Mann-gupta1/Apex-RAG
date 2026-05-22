@@ -1,4 +1,5 @@
 """FastAPI REST + SSE endpoints."""
+
 from __future__ import annotations
 
 import asyncio
@@ -63,13 +64,17 @@ async def chat(request: ChatRequest, http: Request) -> ChatResponse:
     request.tenant_id = _request_tenant(http, request.tenant_id)
     started = time.perf_counter()
 
-    payload = json.dumps({"q": request.query, "mods": [m.value for m in (request.modalities or [])]}, sort_keys=True)
+    payload = json.dumps(
+        {"q": request.query, "mods": [m.value for m in (request.modalities or [])]}, sort_keys=True
+    )
 
     async def _factory():
         if not llm_healthy():
             search_resp = await asyncio.to_thread(
                 run_search,
-                SearchRequest(query=request.query, tenant_id=request.tenant_id, modalities=request.modalities),
+                SearchRequest(
+                    query=request.query, tenant_id=request.tenant_id, modalities=request.modalities
+                ),
             )
             return degraded_chat(request, search_resp.results)
         return await asyncio.to_thread(run_agent, request)
@@ -142,10 +147,21 @@ async def upload(
     try:
         await queue.submit(_ingest_job)
     except QueueFull as exc:
-        raise HTTPException(status_code=429, headers={"Retry-After": str(exc.retry_after_seconds)}) from exc
+        raise HTTPException(
+            status_code=429, headers={"Retry-After": str(exc.retry_after_seconds)}
+        ) from exc
 
-    log_event(tenant_id=tenant_id, action="upload", request={"filename": str(target.name), "bytes": len(content)})
-    return {"status": "queued", "filename": target.name, "bytes": len(content), "tenant_id": tenant_id}
+    log_event(
+        tenant_id=tenant_id,
+        action="upload",
+        request={"filename": str(target.name), "bytes": len(content)},
+    )
+    return {
+        "status": "queued",
+        "filename": target.name,
+        "bytes": len(content),
+        "tenant_id": tenant_id,
+    }
 
 
 @router.post("/feedback")
@@ -170,7 +186,9 @@ async def trigger_eval(http: Request, variant: str = "apex") -> dict:
     try:
         await queue.submit(_job)
     except QueueFull as exc:
-        raise HTTPException(status_code=429, headers={"Retry-After": str(exc.retry_after_seconds)}) from exc
+        raise HTTPException(
+            status_code=429, headers={"Retry-After": str(exc.retry_after_seconds)}
+        ) from exc
     log_event(tenant_id=tenant_id, action="trigger_eval", request={"variant": variant})
     return {"status": "queued", "variant": variant}
 

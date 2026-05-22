@@ -1,4 +1,5 @@
 """Benchmark percentile + table renderer."""
+
 from __future__ import annotations
 
 from apex.scripts.benchmark import _percentile, _render_table
@@ -28,10 +29,26 @@ def test_render_table_contains_metric_names():
         {"id": "apex"},
     ]
     runs = {
-        "naive": {"metrics": {"faithfulness": 0.6, "context_recall": 0.7, "context_precision": 0.65, "answer_relevance": 0.7, "answer_correctness": 0.6},
-                  "latency": {"n": 5, "p50_ms": 100, "p95_ms": 200, "p99_ms": 250, "mean_ms": 150}},
-        "apex":  {"metrics": {"faithfulness": 0.9, "context_recall": 0.85, "context_precision": 0.8, "answer_relevance": 0.88, "answer_correctness": 0.82},
-                  "latency": {"n": 5, "p50_ms": 200, "p95_ms": 400, "p99_ms": 500, "mean_ms": 250}},
+        "naive": {
+            "metrics": {
+                "faithfulness": 0.6,
+                "context_recall": 0.7,
+                "context_precision": 0.65,
+                "answer_relevance": 0.7,
+                "answer_correctness": 0.6,
+            },
+            "latency": {"n": 5, "p50_ms": 100, "p95_ms": 200, "p99_ms": 250, "mean_ms": 150},
+        },
+        "apex": {
+            "metrics": {
+                "faithfulness": 0.9,
+                "context_recall": 0.85,
+                "context_precision": 0.8,
+                "answer_relevance": 0.88,
+                "answer_correctness": 0.82,
+            },
+            "latency": {"n": 5, "p50_ms": 200, "p95_ms": 400, "p99_ms": 500, "mean_ms": 250},
+        },
     }
     md = _render_table(variants, runs)
     assert "faithfulness" in md
@@ -43,10 +60,26 @@ def test_render_table_contains_metric_names():
 def test_render_table_delta_signs():
     variants = [{"id": "n"}, {"id": "a"}]
     runs = {
-        "n": {"metrics": {"faithfulness": 0.5, "context_recall": 0.5, "context_precision": 0.5, "answer_relevance": 0.5, "answer_correctness": 0.5},
-              "latency": {"n": 0, "p50_ms": 0, "p95_ms": 0, "p99_ms": 0, "mean_ms": 0}},
-        "a": {"metrics": {"faithfulness": 0.9, "context_recall": 0.9, "context_precision": 0.9, "answer_relevance": 0.9, "answer_correctness": 0.9},
-              "latency": {"n": 0, "p50_ms": 0, "p95_ms": 0, "p99_ms": 0, "mean_ms": 0}},
+        "n": {
+            "metrics": {
+                "faithfulness": 0.5,
+                "context_recall": 0.5,
+                "context_precision": 0.5,
+                "answer_relevance": 0.5,
+                "answer_correctness": 0.5,
+            },
+            "latency": {"n": 0, "p50_ms": 0, "p95_ms": 0, "p99_ms": 0, "mean_ms": 0},
+        },
+        "a": {
+            "metrics": {
+                "faithfulness": 0.9,
+                "context_recall": 0.9,
+                "context_precision": 0.9,
+                "answer_relevance": 0.9,
+                "answer_correctness": 0.9,
+            },
+            "latency": {"n": 0, "p50_ms": 0, "p95_ms": 0, "p99_ms": 0, "mean_ms": 0},
+        },
     }
     md = _render_table(variants, runs)
     assert "+0.400" in md

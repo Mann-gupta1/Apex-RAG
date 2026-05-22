@@ -1,4 +1,5 @@
 """Adaptive retrieval plan."""
+
 from __future__ import annotations
 
 from apex.retrieval.adaptive import classify, plan

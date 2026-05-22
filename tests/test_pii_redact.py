@@ -1,4 +1,5 @@
 """PII redaction (regex fallback path is always available)."""
+
 from __future__ import annotations
 
 from apex.safety.pii_redact import _redact_with_regex, redact

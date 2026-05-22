@@ -4,6 +4,7 @@ Exercises the orchestrator's branching: HyDE off (cheap path), HyDE on (rewrite
 fan-out), rerank toggling, RRF fusion across multiple ranked lists, and
 adaptive complexity → top_k selection.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -22,14 +23,16 @@ def _seed(store: FakeVectorStore) -> None:
         ("c5", "Exhibit 7 is the signed amendment dated 2023-12-10."),
     ]
     for cid, text in rows:
-        store.upsert([
-            Chunk(
-                id=cid,
-                modality=Modality.TEXT,
-                content=text,
-                provenance=Provenance(source_uri=f"{cid}.txt", modality=Modality.TEXT),
-            )
-        ])
+        store.upsert(
+            [
+                Chunk(
+                    id=cid,
+                    modality=Modality.TEXT,
+                    content=text,
+                    provenance=Provenance(source_uri=f"{cid}.txt", modality=Modality.TEXT),
+                )
+            ]
+        )
 
 
 @pytest.fixture
@@ -73,14 +76,16 @@ def test_run_search_rrf_merges_dense_and_sparse(seeded_store):
 
 
 def test_run_search_modality_filter(seeded_store):
-    seeded_store.upsert([
-        Chunk(
-            id="img1",
-            modality=Modality.IMAGE,
-            content="exhibit photograph of supreme court building",
-            provenance=Provenance(source_uri="img1.jpg", modality=Modality.IMAGE),
-        )
-    ])
+    seeded_store.upsert(
+        [
+            Chunk(
+                id="img1",
+                modality=Modality.IMAGE,
+                content="exhibit photograph of supreme court building",
+                provenance=Provenance(source_uri="img1.jpg", modality=Modality.IMAGE),
+            )
+        ]
+    )
     resp = run_search(
         SearchRequest(
             query="exhibit photograph",
@@ -111,7 +116,9 @@ def test_rewritten_queries_included_when_hyde_on(seeded_store, monkeypatch):
     # Stub the LLM-based rewriters so we don't need Ollama.
     from apex.retrieval import query_rewrite
 
-    monkeypatch.setattr(query_rewrite, "_safe_generate", lambda *a, **k: "alternative phrasing of the question.")
+    monkeypatch.setattr(
+        query_rewrite, "_safe_generate", lambda *a, **k: "alternative phrasing of the question."
+    )
     resp = run_search(
         SearchRequest(
             query="What did Marbury establish?",

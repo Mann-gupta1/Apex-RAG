@@ -1,4 +1,5 @@
 """PDF / text-document ingestion via ``unstructured`` with page-anchored provenance."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -28,7 +29,9 @@ def _load_with_unstructured(path: Path) -> list[tuple[str, dict]]:
 
 def _load_plain_text(path: Path) -> list[tuple[str, dict]]:
     text = path.read_text(encoding="utf-8", errors="ignore")
-    return [(t.strip(), {"page_number": i + 1}) for i, t in enumerate(text.split("\n\n")) if t.strip()]
+    return [
+        (t.strip(), {"page_number": i + 1}) for i, t in enumerate(text.split("\n\n")) if t.strip()
+    ]
 
 
 def load_document(path: Path) -> list[Chunk]:

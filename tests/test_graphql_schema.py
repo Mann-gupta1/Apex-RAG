@@ -1,4 +1,5 @@
 """Strawberry schema introspection."""
+
 from __future__ import annotations
 
 from apex.api.graphql_schema import schema

@@ -1,4 +1,5 @@
 """Audit log helper — verify it never raises and constructs the right SQL params."""
+
 from __future__ import annotations
 
 from apex.api import audit

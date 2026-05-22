@@ -1,4 +1,5 @@
 """Chunking determinism and modality preservation."""
+
 from __future__ import annotations
 
 from apex.chunking.multimodal import chunk_documents

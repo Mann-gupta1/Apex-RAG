@@ -1,4 +1,5 @@
 """Reciprocal Rank Fusion math + monotonicity properties."""
+
 from __future__ import annotations
 
 from apex.retrieval.hybrid import reciprocal_rank_fusion

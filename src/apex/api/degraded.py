@@ -4,6 +4,7 @@ When the generator LLM (Ollama) is unreachable we still want to return
 something useful — namely the retrieved chunks with a "sources found,
 generation unavailable" banner.
 """
+
 from __future__ import annotations
 
 from apex.llm.ollama_client import health as _ollama_health

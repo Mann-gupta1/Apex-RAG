@@ -1,4 +1,5 @@
 """Structured logging with loguru. Every module should do ``from apex.logging_config import logger``."""
+
 from __future__ import annotations
 
 import sys

@@ -3,6 +3,7 @@
 We use LangGraph when it's installed and gracefully degrade to a plain Python
 state machine when it isn't (so unit tests don't have to load the framework).
 """
+
 from __future__ import annotations
 
 import time
@@ -52,13 +53,17 @@ def _format_context(hits: list[RetrievedChunk]) -> str:
 def _node_router(state: AgentState) -> AgentState:
     decision = router.explain(state.query)
     state.route = decision.kind
-    state.steps.append(AgentStep(node="router", detail={"kind": decision.kind, "reason": decision.reason}))
+    state.steps.append(
+        AgentStep(node="router", detail={"kind": decision.kind, "reason": decision.reason})
+    )
     return state
 
 
 def _node_retrieve(state: AgentState) -> AgentState:
     decision = router.classify(state.query)
-    req = SearchRequest(query=state.query, tenant_id=state.tenant_id, modalities=decision.modalities)
+    req = SearchRequest(
+        query=state.query, tenant_id=state.tenant_id, modalities=decision.modalities
+    )
     resp = run_search(req)
     state.retrieved = resp.results
     state.steps.append(
@@ -148,8 +153,12 @@ def _run_loop(state: AgentState) -> AgentState:
         report = deep_research(state.query, tenant_id=state.tenant_id)
         state.answer = report.memo
         state.retrieved = [c for n in report.notes for c in n.chunks]
-        state.steps.append(AgentStep(node="deep_research", detail={"subquestions": len(report.notes)}))
-        state.faithfulness = faithfulness_score(state.answer, [h.chunk.content for h in state.retrieved])
+        state.steps.append(
+            AgentStep(node="deep_research", detail={"subquestions": len(report.notes)})
+        )
+        state.faithfulness = faithfulness_score(
+            state.answer, [h.chunk.content for h in state.retrieved]
+        )
         return state
 
     _node_retrieve(state)
@@ -203,4 +212,8 @@ def stream_agent(req: ChatRequest) -> Iterator[dict[str, Any]]:
     yield {"event": "critique", "verdict": state.critique, "nli": round(state.faithfulness, 3)}
 
     resp = _build_response(state, started)
-    yield {"event": "done", "citations": [c.model_dump() for c in resp.citations], "latency_ms": resp.latency_ms}
+    yield {
+        "event": "done",
+        "citations": [c.model_dump() for c in resp.citations],
+        "latency_ms": resp.latency_ms,
+    }

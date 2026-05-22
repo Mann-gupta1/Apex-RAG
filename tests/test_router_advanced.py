@@ -1,4 +1,5 @@
 """Edge cases for the agent router that pair with the e2e graph."""
+
 from __future__ import annotations
 
 from apex.agent.router import classify

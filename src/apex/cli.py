@@ -7,6 +7,7 @@ Examples
     apex eval
     apex serve --reload
 """
+
 from __future__ import annotations
 
 from pathlib import Path

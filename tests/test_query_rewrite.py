@@ -1,4 +1,5 @@
 """Query rewrite fallbacks (no Ollama required)."""
+
 from __future__ import annotations
 
 from apex.retrieval import query_rewrite

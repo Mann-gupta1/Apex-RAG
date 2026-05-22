@@ -1,4 +1,5 @@
 """FastAPI smoke tests — exercise the wiring without DB / LLM dependencies."""
+
 from __future__ import annotations
 
 from fastapi.testclient import TestClient

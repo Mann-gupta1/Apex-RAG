@@ -8,6 +8,7 @@ Usage::
 
     python -m apex.scripts.hnsw_tune --output notebooks/hnsw_sweep.csv
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,10 +38,15 @@ def _exact_topk(embedding: list[float], top_k: int, tenant_id: str) -> list[str]
     )
     with session_scope() as s:
         s.execute(text("SET LOCAL hnsw.ef_search = 200"))
-        return [str(r.id) for r in s.execute(sql, {"q": q, "tenant_id": tenant_id, "top_k": top_k}).all()]
+        return [
+            str(r.id)
+            for r in s.execute(sql, {"q": q, "tenant_id": tenant_id, "top_k": top_k}).all()
+        ]
 
 
-def _approx_topk_with_timing(embedding: list[float], top_k: int, ef_search: int, tenant_id: str) -> tuple[list[str], float]:
+def _approx_topk_with_timing(
+    embedding: list[float], top_k: int, ef_search: int, tenant_id: str
+) -> tuple[list[str], float]:
     q = "[" + ",".join(f"{x:.6f}" for x in embedding) + "]"
     sql = text(
         """
@@ -53,7 +59,10 @@ def _approx_topk_with_timing(embedding: list[float], top_k: int, ef_search: int,
     with session_scope() as s:
         s.execute(text(f"SET LOCAL hnsw.ef_search = {ef_search}"))
         t0 = time.perf_counter()
-        ids = [str(r.id) for r in s.execute(sql, {"q": q, "tenant_id": tenant_id, "top_k": top_k}).all()]
+        ids = [
+            str(r.id)
+            for r in s.execute(sql, {"q": q, "tenant_id": tenant_id, "top_k": top_k}).all()
+        ]
         latency = (time.perf_counter() - t0) * 1000
     return ids, latency
 
@@ -62,7 +71,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", default="notebooks/hnsw_sweep.csv")
     parser.add_argument("--top-k", type=int, default=10)
-    parser.add_argument("--queries", default=None, help="Path to a JSON file with a 'questions' list")
+    parser.add_argument(
+        "--queries", default=None, help="Path to a JSON file with a 'questions' list"
+    )
     args = parser.parse_args()
 
     settings = get_settings()
@@ -88,16 +99,25 @@ def main() -> int:
         latencies: list[float] = []
         for vec in q_vectors:
             gold = set(_exact_topk(vec, args.top_k, settings.apex_default_tenant))
-            approx, lat = _approx_topk_with_timing(vec, args.top_k, ef, settings.apex_default_tenant)
+            approx, lat = _approx_topk_with_timing(
+                vec, args.top_k, ef, settings.apex_default_tenant
+            )
             inter = len(gold.intersection(approx))
             recalls.append(inter / max(1, len(gold)))
             latencies.append(lat)
-        rows.append([
-            ef,
-            round(statistics.mean(recalls), 4),
-            round(statistics.median(latencies), 2),
-            round(statistics.quantiles(latencies, n=20)[18] if len(latencies) >= 20 else max(latencies), 2),
-        ])
+        rows.append(
+            [
+                ef,
+                round(statistics.mean(recalls), 4),
+                round(statistics.median(latencies), 2),
+                round(
+                    statistics.quantiles(latencies, n=20)[18]
+                    if len(latencies) >= 20
+                    else max(latencies),
+                    2,
+                ),
+            ]
+        )
 
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)

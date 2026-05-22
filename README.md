@@ -9,20 +9,22 @@ Most RAG demos stop at "chat with your PDF." **Apex RAG** simulates a real enter
 
 ## Why this exists
 
-| Most demos | Apex RAG |
-|---|---|
-| One modality (text) | Text + image + video + audio with timestamp/page/bbox provenance |
-| Single-vector top-k | Hybrid (dense + BM25 + RRF) + HyDE rewriting + cross-encoder rerank |
-| `gpt-4o.invoke(prompt)` | LangGraph router → retrieve → rerank → generate → NLI critique → refine |
-| `eval.py` printing 3 scores | RAGAS + Phoenix tracing + regression guard + drift detection |
-| `app.py` (Streamlit) | FastAPI + gRPC + GraphQL + Next.js control plane + Streamlit feedback |
-| `cool_demo.gif` | Case study + ADRs + sprint timeline + benchmark vs naive RAG |
+
+| Most demos                  | Apex RAG                                                                |
+| --------------------------- | ----------------------------------------------------------------------- |
+| One modality (text)         | Text + image + video + audio with timestamp/page/bbox provenance        |
+| Single-vector top-k         | Hybrid (dense + BM25 + RRF) + HyDE rewriting + cross-encoder rerank     |
+| `gpt-4o.invoke(prompt)`     | LangGraph router → retrieve → rerank → generate → NLI critique → refine |
+| `eval.py` printing 3 scores | RAGAS + Phoenix tracing + regression guard + drift detection            |
+| `app.py` (Streamlit)        | FastAPI + gRPC + GraphQL + Next.js control plane + Streamlit feedback   |
+| `cool_demo.gif`             | Case study + ADRs + sprint timeline + benchmark vs naive RAG            |
+
 
 ---
 
 ## Architecture
 
-See [`docs/architecture.md`](docs/architecture.md) for the deep dive. Top-level:
+See `[docs/architecture.md](docs/architecture.md)` for the deep dive. Top-level:
 
 ```
 ingest (pdf/image/video/audio) → multimodal chunking → embeddings
@@ -44,7 +46,7 @@ RAGAS · Phoenix traces · regression guard · drift detection · HITL feedback 
 
 ## Quickstart (fully local, free)
 
-**Requires Docker + ~8GB RAM (~10GB disk for models).** Run `make setup` to start Postgres, Redis, Ollama, and Phoenix.
+**Requires Docker + ~~8GB RAM (~~10GB disk for models).** Run `make setup` to start Postgres, Redis, Ollama, and Phoenix.
 
 Prerequisites: Docker Desktop, Python 3.10+, Node 20+, ~10 GB free disk for models.
 
@@ -95,15 +97,17 @@ All scripts, configs, and migrations are production-ready.
 
 ## Validation checklist (portfolio)
 
-| Item | What you do | How you prove it |
-|------|-------------|------------------|
-| Live stack | `docker-compose.yml` + `make setup` | README quickstart; `make services` |
-| DB migrations | Alembic in `alembic/versions/` | `make validate` (offline); `make migrate` (live) |
-| Corpus ingestion | `make ingest` / `make ingest-sample` | 3 samples in `data/sample_docs/` |
-| Ollama model | `scripts/pull_models.sh` | `make pull-models`; README model pull |
-| Benchmark | `make benchmark-mock` (offline) / `make benchmark` (live) | `docs/benchmark.md` + `data/eval_runs/*.json` |
-| gRPC test | `tests/test_grpc_integration.py` | Mock test passes; live test `@pytest.mark.skip` |
-| Golden set 50 | `data/eval_golden.json` | `tests/test_eval_golden_schema.py` |
+
+| Item             | What you do                                               | How you prove it                                 |
+| ---------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| Live stack       | `docker-compose.yml` + `make setup`                       | README quickstart; `make services`               |
+| DB migrations    | Alembic in `alembic/versions/`                            | `make validate` (offline); `make migrate` (live) |
+| Corpus ingestion | `make ingest` / `make ingest-sample`                      | 3 samples in `data/sample_docs/`                 |
+| Ollama model     | `scripts/pull_models.sh`                                  | `make pull-models`; README model pull            |
+| Benchmark        | `make benchmark-mock` (offline) / `make benchmark` (live) | `docs/benchmark.md` + `data/eval_runs/*.json`    |
+| gRPC test        | `tests/test_grpc_integration.py`                          | Mock test passes; live test `@pytest.mark.skip`  |
+| Golden set 50    | `data/eval_golden.json`                                   | `tests/test_eval_golden_schema.py`               |
+
 
 Offline validation (no Docker):
 
@@ -112,68 +116,6 @@ make validate
 make benchmark-mock
 pytest tests/test_eval_golden_schema.py tests/test_grpc_integration.py -v
 ```
-
----
-
-## Repository layout
-
-```
-apex-rag/
-├── src/apex/                    # the python package
-│   ├── ingest/                  # pdf, image, video, audio loaders
-│   ├── chunking/                # multimodal + contextual retrieval chunker
-│   ├── embedding/               # bge / open-clip / whisper loaders
-│   ├── retrieval/               # hybrid, rerank, query_rewrite, contextual, adaptive
-│   ├── agent/                   # LangGraph router/graph/tools/deep_research
-│   ├── safety/                  # citation grounding, NLI faithfulness, PII redaction
-│   ├── eval/                    # RAGAS, phoenix, regression guard, drift
-│   ├── api/                     # FastAPI REST, gRPC server, GraphQL schema, middleware
-│   ├── feedback/                # thumbs up/down + DPO / reranker fine-tune dataset
-│   └── scripts/                 # benchmark, demo corpus downloader, hnsw tuner, quantize
-├── vector_db/
-│   ├── pgvector/                # init.sql + driver
-│   └── weaviate/                # alternative driver
-├── proto/apex.proto             # gRPC contract
-├── alembic/                     # schema migrations
-├── config/                      # retrieval.yaml + eval.yaml
-├── data/                        # raw_docs, processed_chunks, eval_golden.json
-├── ui/
-│   ├── app/                     # Next.js 14 control plane
-│   └── streamlit_app.py         # human feedback loop
-├── docs/                        # case_study, architecture, ADRs, blog, demo_script
-├── notebooks/                   # benchmark report, hnsw sweep
-├── infra/terraform/             # multi-region (documented, not applied)
-├── tests/
-└── .github/workflows/           # PR + build
-```
-
----
-
-## Component status
-
-| Component                       | Status | Notes |
-|--------------------------------|:------:|-------|
-| PDF/text ingestion (unstructured) | ✅ | `src/apex/ingest/pdf.py` |
-| Image embeddings (open-clip)    | ✅ | `src/apex/ingest/image.py` |
-| Video scene detection           | ✅ | `src/apex/ingest/video.py` (PySceneDetect) |
-| Audio transcription + diarization | ✅ | `src/apex/ingest/audio.py` (faster-whisper + pyannote) |
-| pgvector + Weaviate drivers     | ✅ | pluggable `VectorStore` protocol |
-| Hybrid search (dense + BM25 + RRF) | ✅ | `src/apex/retrieval/hybrid.py` |
-| Cross-encoder rerank            | ✅ | BGE-reranker-base |
-| HyDE / step-back / multi-query  | ✅ | local Ollama for rewrites |
-| LangGraph agent + NLI critique  | ✅ | `src/apex/agent/graph.py` |
-| RAGAS + Phoenix + regression guard | ✅ | `src/apex/eval/*` |
-| FastAPI REST + SSE              | ✅ | `src/apex/api/rest.py` |
-| gRPC streaming                  | ✅ | `proto/apex.proto` + `grpc_server.py` |
-| Strawberry GraphQL              | ✅ | `src/apex/api/graphql_schema.py` |
-| Multi-tenant + rate limit + audit | ✅ | `src/apex/api/middleware.py` |
-| PII redaction (Presidio)        | ✅ | `src/apex/safety/pii_redact.py` |
-| Request dedup + backpressure    | ✅ | `src/apex/api/dedup.py`, `backpressure.py` |
-| Degraded mode (LLM down)        | ✅ | `src/apex/api/degraded.py` |
-| Next.js control plane           | ✅ | `ui/app/` |
-| Streamlit feedback loop         | ✅ | `ui/streamlit_app.py` |
-| Benchmark notebook              | ✅ | `notebooks/benchmark_report.ipynb` |
-| Case study + ADRs + blog post   | ✅ | `docs/` |
 
 ---
 
@@ -198,15 +140,6 @@ make lint / format / test / proto
 ```
 
 ---
-
-## Documents to read next
-
-- **[Case study](docs/case_study.md)** — the consulting narrative (Fortune 500 legal discovery firm).
-- **[Architecture](docs/architecture.md)** — components, sequence diagrams, ADRs.
-- **[Benchmark](docs/benchmark.md)** — naive RAG vs Apex RAG (recall, faithfulness, latency).
-- **[Demo script](docs/demo_script.md)** — 5-minute screen-recording shot list.
-- **[Blog post](docs/blog_post.md)** — long-form write-up.
-- **[Runbook](docs/runbook.md)** — on-call playbook.
 
 ---
 

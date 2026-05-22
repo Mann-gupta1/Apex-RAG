@@ -1,4 +1,5 @@
 """Feedback export pipelines (reranker pairs + DPO)."""
+
 from __future__ import annotations
 
 import json
@@ -8,11 +9,56 @@ from apex.feedback import human_loop
 
 def _fake_rows():
     return [
-        {"id": 1, "tenant_id": "t1", "query": "what year?", "response": "1803", "chunk_ids": ["c1"], "rating": 1, "comment": None, "created_at": None},
-        {"id": 2, "tenant_id": "t1", "query": "what year?", "response": "1804", "chunk_ids": ["c2"], "rating": -1, "comment": None, "created_at": None},
-        {"id": 3, "tenant_id": "t1", "query": "what year?", "response": "1803 confirmed", "chunk_ids": ["c1", "c3"], "rating": 1, "comment": None, "created_at": None},
-        {"id": 4, "tenant_id": "t1", "query": "who decided?", "response": "Marshall", "chunk_ids": ["c4"], "rating": 1, "comment": None, "created_at": None},
-        {"id": 5, "tenant_id": "t1", "query": "who decided?", "response": "Taney", "chunk_ids": ["c5"], "rating": -1, "comment": None, "created_at": None},
+        {
+            "id": 1,
+            "tenant_id": "t1",
+            "query": "what year?",
+            "response": "1803",
+            "chunk_ids": ["c1"],
+            "rating": 1,
+            "comment": None,
+            "created_at": None,
+        },
+        {
+            "id": 2,
+            "tenant_id": "t1",
+            "query": "what year?",
+            "response": "1804",
+            "chunk_ids": ["c2"],
+            "rating": -1,
+            "comment": None,
+            "created_at": None,
+        },
+        {
+            "id": 3,
+            "tenant_id": "t1",
+            "query": "what year?",
+            "response": "1803 confirmed",
+            "chunk_ids": ["c1", "c3"],
+            "rating": 1,
+            "comment": None,
+            "created_at": None,
+        },
+        {
+            "id": 4,
+            "tenant_id": "t1",
+            "query": "who decided?",
+            "response": "Marshall",
+            "chunk_ids": ["c4"],
+            "rating": 1,
+            "comment": None,
+            "created_at": None,
+        },
+        {
+            "id": 5,
+            "tenant_id": "t1",
+            "query": "who decided?",
+            "response": "Taney",
+            "chunk_ids": ["c5"],
+            "rating": -1,
+            "comment": None,
+            "created_at": None,
+        },
     ]
 
 

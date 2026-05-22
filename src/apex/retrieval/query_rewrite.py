@@ -3,6 +3,7 @@
 Every rewrite calls Ollama. When Ollama is unreachable the helpers fall back
 to returning the original query so the rest of the pipeline keeps working.
 """
+
 from __future__ import annotations
 
 from apex.logging_config import logger

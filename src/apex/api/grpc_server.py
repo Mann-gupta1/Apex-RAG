@@ -7,6 +7,7 @@ The generated stubs (``apex_pb2``, ``apex_pb2_grpc``) are produced by
 * Stubs missing → log a single warning and exit cleanly (the rest of the
   build still passes tests / imports without the generated code).
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -94,7 +95,9 @@ def _build_agent_servicer(pb2, pb2_grpc):
         def Call(self, request, context):
             tool = TOOLS.get(request.tool)
             if tool is None:
-                return pb2.ToolResponse(name=request.tool, ok=False, result_json="{}", error="unknown tool")
+                return pb2.ToolResponse(
+                    name=request.tool, ok=False, result_json="{}", error="unknown tool"
+                )
             args = json.loads(request.args_json or "{}")
             try:
                 result = tool(**args)
@@ -105,7 +108,9 @@ def _build_agent_servicer(pb2, pb2_grpc):
                     error=result.error or "",
                 )
             except Exception as exc:
-                return pb2.ToolResponse(name=request.tool, ok=False, result_json="{}", error=str(exc))
+                return pb2.ToolResponse(
+                    name=request.tool, ok=False, result_json="{}", error=str(exc)
+                )
 
     return AgentServicer()
 

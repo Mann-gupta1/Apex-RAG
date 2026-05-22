@@ -7,6 +7,7 @@ the metrics enumerated in ``config/eval.yaml``.
 Falls back to a deterministic, lightweight scoring path when RAGAS itself is
 not installed so the CI regression guard still has something to compare.
 """
+
 from __future__ import annotations
 
 import json
@@ -65,24 +66,40 @@ def _build_records(variant: str) -> list[dict[str, Any]]:
             logger.warning("record build failed for {!r}: {}", question, exc)
             contexts, answer = [], ""
 
-        records.append({
-            "question": question,
-            "ground_truth": gt,
-            "contexts": contexts,
-            "answer": answer,
-            "expected_sources": item.get("expected_sources", []),
-        })
+        records.append(
+            {
+                "question": question,
+                "ground_truth": gt,
+                "contexts": contexts,
+                "answer": answer,
+                "expected_sources": item.get("expected_sources", []),
+            }
+        )
     return records
 
 
 def _fallback_metrics(records: list[dict[str, Any]]) -> list[EvalMetric]:
     """Cheap deterministic substitutes for the RAGAS metrics."""
     n = max(1, len(records))
-    faith = sum(1 for r in records if r["ground_truth"] and r["answer"] and any(
-        tok in r["answer"].lower() for tok in r["ground_truth"].lower().split()[:5]
-    )) / n
+    faith = (
+        sum(
+            1
+            for r in records
+            if r["ground_truth"]
+            and r["answer"]
+            and any(tok in r["answer"].lower() for tok in r["ground_truth"].lower().split()[:5])
+        )
+        / n
+    )
     recall = sum(1 for r in records if r["contexts"]) / n
-    precision = sum(1 for r in records if r["contexts"] and r["ground_truth"][:30].lower() in " ".join(r["contexts"]).lower()) / n
+    precision = (
+        sum(
+            1
+            for r in records
+            if r["contexts"] and r["ground_truth"][:30].lower() in " ".join(r["contexts"]).lower()
+        )
+        / n
+    )
     relevance = sum(1 for r in records if r["answer"]) / n
     correctness = (faith + relevance) / 2
     return [
@@ -112,19 +129,27 @@ def _ragas_metrics(records: list[dict[str, Any]]) -> list[EvalMetric] | None:
     if not records:
         return None
 
-    ds = Dataset.from_list([
-        {
-            "question": r["question"],
-            "answer": r["answer"],
-            "contexts": r["contexts"] or [""],
-            "ground_truth": r["ground_truth"],
-        }
-        for r in records
-    ])
+    ds = Dataset.from_list(
+        [
+            {
+                "question": r["question"],
+                "answer": r["answer"],
+                "contexts": r["contexts"] or [""],
+                "ground_truth": r["ground_truth"],
+            }
+            for r in records
+        ]
+    )
     try:
         result = evaluate(
             ds,
-            metrics=[faithfulness, context_recall, context_precision, answer_relevancy, answer_correctness],
+            metrics=[
+                faithfulness,
+                context_recall,
+                context_precision,
+                answer_relevancy,
+                answer_correctness,
+            ],
             raise_exceptions=False,
         )
         scores = result.to_pandas().mean(numeric_only=True).to_dict()
@@ -155,7 +180,9 @@ def run_eval(variant: str = "apex") -> EvalRunSummary:
     }
     (out_dir / f"{run_id}.json").write_text(json.dumps(artefact, indent=2), encoding="utf-8")
     logger.info("eval done variant={} metrics={}", variant, artefact["metrics"])
-    return EvalRunSummary(run_id=run_id, started_at=started, finished_at=finished, metrics=metrics, variant=variant)
+    return EvalRunSummary(
+        run_id=run_id, started_at=started, finished_at=finished, metrics=metrics, variant=variant
+    )
 
 
 if __name__ == "__main__":

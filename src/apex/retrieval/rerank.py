@@ -4,6 +4,7 @@ Takes top-N hybrid results and re-scores them with a query+passage cross-encoder
 A monotonic relevance-aware score is appended (``rerank_score``) and used to
 reorder the list.
 """
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -27,7 +28,9 @@ class Reranker:
             try:
                 from sentence_transformers import CrossEncoder
             except ImportError as exc:  # pragma: no cover
-                raise RuntimeError("sentence-transformers not installed (need [ingest] extra)") from exc
+                raise RuntimeError(
+                    "sentence-transformers not installed (need [ingest] extra)"
+                ) from exc
             logger.info("loading reranker {}", self.model_name)
             self._model = CrossEncoder(self.model_name)
         return self._model

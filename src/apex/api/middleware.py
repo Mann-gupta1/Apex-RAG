@@ -1,4 +1,5 @@
 """FastAPI middleware: tenant resolution, rate limit, audit context, latency header."""
+
 from __future__ import annotations
 
 import time
@@ -65,7 +66,9 @@ def resolve_tenant(request: Request) -> str:
 class TenantAndRateLimitMiddleware(BaseHTTPMiddleware):
     """Sets ``request.state.tenant_id`` and applies a per-tenant token bucket."""
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         started = time.perf_counter()
         tenant_id = resolve_tenant(request)
         request.state.tenant_id = tenant_id

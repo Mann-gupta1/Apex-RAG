@@ -4,6 +4,7 @@ Each scene becomes one Chunk whose content is the transcript segment text and
 whose provenance carries ``timestamp_start/end``, ``scene_index``, and the
 path to the saved keyframe (under ``data/processed_chunks/keyframes/``).
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -45,10 +46,21 @@ def _extract_keyframe(path: Path, t_seconds: float, out_path: Path) -> bool:
     try:
         subprocess.run(
             [
-                "ffmpeg", "-y", "-ss", f"{t_seconds:.3f}", "-i", str(path),
-                "-frames:v", "1", "-q:v", "3", str(out_path),
+                "ffmpeg",
+                "-y",
+                "-ss",
+                f"{t_seconds:.3f}",
+                "-i",
+                str(path),
+                "-frames:v",
+                "1",
+                "-q:v",
+                "3",
+                str(out_path),
             ],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         return out_path.exists()
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
@@ -61,10 +73,20 @@ def _extract_audio_track(path: Path) -> Path | None:
     try:
         subprocess.run(
             [
-                "ffmpeg", "-y", "-i", str(path),
-                "-vn", "-ac", "1", "-ar", "16000", str(audio_path),
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(path),
+                "-vn",
+                "-ac",
+                "1",
+                "-ar",
+                "16000",
+                str(audio_path),
             ],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         return audio_path if audio_path.exists() else None
     except (subprocess.CalledProcessError, FileNotFoundError):

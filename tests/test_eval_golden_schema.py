@@ -1,4 +1,5 @@
 """Golden eval set schema validation (50 items)."""
+
 from __future__ import annotations
 
 import json

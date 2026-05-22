@@ -3,6 +3,7 @@
 Called from the FastAPI lifespan; safe to import without arize-phoenix
 installed (no-op in that case).
 """
+
 from __future__ import annotations
 
 import os
